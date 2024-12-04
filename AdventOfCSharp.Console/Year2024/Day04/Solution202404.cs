@@ -103,6 +103,30 @@ public static class Solution202404
 
     public static int Solution2(string[] fileContents)
     {
-        throw new NotImplementedException();
+        int total = 0;
+        for (int i = 1; i < fileContents.Length - 1; i++)
+        {
+            var preS = fileContents[i - 1];
+            var s = fileContents[i];
+            var nextS = fileContents[i + 1];
+            for (int j = 1; j < s.Length - 1; j++)
+            {
+                if (s[j] != 'A')
+                {
+                    continue;
+                }
+                var fromTopLeft =
+                    (preS[j - 1] == 'M' && nextS[j + 1] == 'S')
+                    || (preS[j - 1] == 'S' && nextS[j + 1] == 'M');
+                var fromBottomLeft =
+                    (nextS[j - 1] == 'M' && preS[j + 1] == 'S')
+                    || (nextS[j - 1] == 'S' && preS[j + 1] == 'M');
+                if (fromTopLeft && fromBottomLeft)
+                {
+                    total++;
+                }
+            }
+        }
+        return total;
     }
 }
