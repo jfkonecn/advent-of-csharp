@@ -16,15 +16,61 @@ public static class Solution202403
         public required int Value2 { get; init; }
     }
 
+    private record DoInstruction : Instruction { }
+
+    private record DontInstruction : Instruction { }
+
+    private static bool TryParseAsDo(
+        string s,
+        int startIdx,
+        out int newIndex,
+        out DoInstruction instruction
+    )
+    {
+        newIndex = startIdx;
+        instruction = new DoInstruction() { };
+        if (s.Length <= startIdx + 3)
+        {
+            return false;
+        }
+        if (s.Substring(startIdx, 4) != "do()")
+        {
+            return false;
+        }
+        newIndex += 4;
+        return true;
+    }
+
+    private static bool TryParseAsDont(
+        string s,
+        int startIdx,
+        out int newIndex,
+        out DontInstruction instruction
+    )
+    {
+        newIndex = startIdx;
+        instruction = new DontInstruction() { };
+        if (s.Length <= startIdx + 6)
+        {
+            return false;
+        }
+        if (s.Substring(startIdx, 7) != "don't()")
+        {
+            return false;
+        }
+        newIndex += 7;
+        return true;
+    }
+
     private static bool TryParseAsMultiply(
         string s,
         int startIdx,
         out int newIndex,
-        out Instruction instruction
+        out MultiplyInstruction instruction
     )
     {
         newIndex = startIdx;
-        instruction = new Instruction();
+        instruction = new MultiplyInstruction() { Value1 = 0, Value2 = 0 };
         if (s.Length <= startIdx + 8)
         {
             return false;
@@ -41,6 +87,7 @@ public static class Solution202403
         {
             return false;
         }
+        newIndex++;
 
         bool isValid;
         int value1;
@@ -58,6 +105,7 @@ public static class Solution202403
             return false;
         }
 
+        instruction = new MultiplyInstruction() { Value1 = value1, Value2 = value2 };
         return true;
     }
 
@@ -70,7 +118,6 @@ public static class Solution202403
         var digits = new List<char>();
         while (true)
         {
-            newIndex++;
             if (newIndex >= s.Length)
             {
                 return (false, 0, 0);
@@ -88,6 +135,7 @@ public static class Solution202403
             {
                 return (false, 0, 0);
             }
+            newIndex++;
         }
         if (digits.Count > 3 || digits.Count < 1)
         {
@@ -97,23 +145,57 @@ public static class Solution202403
         return (true, newIndex + 1, number);
     }
 
-    private IReadOnlyCollection<Instruction> Parse(string fileContents) { }
-
     public static int Solution1(string[] fileContents)
     {
-        if (fileContents.Length != 1)
+        var s = string.Join("", fileContents);
+        int i = 0;
+        int answer = 0;
+        while (i < s.Length)
         {
-            throw new Exception("Expected the length of the array to be 1");
+            if (TryParseAsMultiply(s, i, out var newIndex, out var instruction))
+            {
+                i = newIndex;
+                answer += instruction.Value1 * instruction.Value2;
+            }
+            else
+            {
+                i++;
+            }
         }
-        throw new NotImplementedException();
+        return answer;
     }
 
     public static int Solution2(string[] fileContents)
     {
-        if (fileContents.Length != 1)
+        var s = string.Join("", fileContents);
+        int i = 0;
+        bool shouldAdd = true;
+        int answer = 0;
+        while (i < s.Length)
         {
-            throw new Exception("Expected the length of the array to be 1");
+            if (TryParseAsMultiply(s, i, out var newIndex, out var instruction))
+            {
+                i = newIndex;
+                if (shouldAdd)
+                {
+                    answer += instruction.Value1 * instruction.Value2;
+                }
+            }
+            else if (TryParseAsDo(s, i, out newIndex, out var _))
+            {
+                i = newIndex;
+                shouldAdd = true;
+            }
+            else if (TryParseAsDont(s, i, out newIndex, out var _))
+            {
+                i = newIndex;
+                shouldAdd = false;
+            }
+            else
+            {
+                i++;
+            }
         }
-        throw new NotImplementedException();
+        return answer;
     }
 }
