@@ -5,7 +5,8 @@ namespace AdventOfCSharp.Console.Tests.Year2024.Day05;
 [TestFixture]
 public class Solution202405Tests
 {
-    [TestCase("example1.txt", 0)]
+    [TestCase("example1.txt", 143)]
+    [TestCase("real.txt", 5129)]
     public async Task Solution1Tests(string fileName, int expected)
     {
         var fileContents = await Utils.GetAdventTestFile(2024, 05, fileName);
