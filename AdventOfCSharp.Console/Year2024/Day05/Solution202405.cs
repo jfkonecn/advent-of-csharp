@@ -59,7 +59,6 @@ public static class Solution202405
     {
         var parsedResult = Parse(fileContents);
         var rules = parsedResult.Rules;
-        foreach (var pages in parsedResult.Pages) { }
 
         return parsedResult
             .Pages.Where(pages =>
@@ -87,6 +86,47 @@ public static class Solution202405
 
     public static int Solution2(string[] fileContents)
     {
+        var parsedResult = Parse(fileContents);
+        var rules = parsedResult.Rules;
+
+        return parsedResult
+            .Pages.Where(pages =>
+            {
+                for (int i = 1; i < pages.Count; i++)
+                {
+                    var x = pages[i - 1];
+                    var y = pages[i];
+                    var rule = rules[x];
+                    if (rule.Before.Contains(y))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            .Select(pages =>
+            {
+                pages.Sort(
+                    (x, y) =>
+                    {
+                        var rule = rules[x];
+                        if (rule.After.Contains(y))
+                        {
+                            return -1;
+                        }
+                        else if (rule.Before.Contains(y))
+                        {
+                            return 1;
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    }
+                );
+                return pages[pages.Count / 2];
+            })
+            .Sum();
         throw new NotImplementedException();
     }
 }
