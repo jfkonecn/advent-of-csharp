@@ -116,9 +116,11 @@ public static class Solution202406
 
     public static int Solution2(string[] fileContents)
     {
-        var (points, (i, j)) = Parse(fileContents);
+        var (points, (startI, startJ)) = Parse(fileContents);
+        var i = startI;
+        var j = startJ;
         var direction = Direction.Up;
-        int blocks = 0;
+        var blocks = new HashSet<(int, int)>();
         while (points.GetLength(0) > i && points.GetLength(1) > j && i >= 0 && j >= 0)
         {
             if (direction == Direction.Up && i > 0 && points[i - 1, j] == Point.Occupied)
@@ -147,65 +149,97 @@ public static class Solution202406
             }
             else if (direction == Direction.Up)
             {
-                if (DoesLoop(points, i, j, direction))
+                if (DoesLoop(points, i - 1, j, direction, startI, startJ))
                 {
-                    blocks++;
+                    blocks.Add((i - 1, j));
                 }
 
                 i--;
             }
             else if (direction == Direction.Right)
             {
-                if (DoesLoop(points, i, j, direction))
+                if (DoesLoop(points, i, j + 1, direction, startI, startJ))
                 {
-                    blocks++;
+                    blocks.Add((i, j + 1));
                 }
 
                 j++;
             }
             else if (direction == Direction.Down)
             {
-                if (DoesLoop(points, i, j, direction))
+                if (DoesLoop(points, i + 1, j, direction, startI, startJ))
                 {
-                    blocks++;
+                    blocks.Add((i + 1, j));
                 }
 
                 i++;
             }
             else if (direction == Direction.Left)
             {
-                if (DoesLoop(points, i, j, direction))
+                if (DoesLoop(points, i, j - 1, direction, startI, startJ))
                 {
-                    blocks++;
+                    blocks.Add((i, j - 1));
                 }
 
                 j--;
             }
         }
-        return blocks;
+        return blocks.Count;
     }
 
-    private static bool DoesLoop(Point[,] points, int i, int j, Direction direction)
+    private static T[,] DeepCloneArray<T>(T[,] original)
+    {
+        int rows = original.GetLength(0);
+        int cols = original.GetLength(1);
+
+        // Create a new array with the same dimensions
+        var clone = new T[rows, cols];
+
+        // Copy each element from the original array to the new array
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                clone[i, j] = original[i, j];
+            }
+        }
+
+        return clone;
+    }
+
+    private static bool DoesLoop(
+        Point[,] points,
+        int pivotI,
+        int pivotJ,
+        Direction direction,
+        int startI,
+        int startJ
+    )
     {
         if (
-            (i == 0 && direction == Direction.Up)
-            || (j == 0 && direction == Direction.Left)
-            || (i + 1 == points.GetLength(0) && direction == Direction.Down)
-            || (j + 1 == points.GetLength(1) && direction == Direction.Right)
+            pivotI < 0
+            || pivotJ < 0
+            || pivotI == points.GetLength(0)
+            || pivotJ == points.GetLength(1)
         )
         {
             return false;
         }
-        var visited = new HashSet<(int i, int j, Direction direction)>() { (i, j, direction) };
-
-        direction = direction switch
+        if (pivotI == startI && pivotJ == startJ)
         {
-            Direction.Up => Direction.Right,
-            Direction.Right => Direction.Down,
-            Direction.Down => Direction.Left,
-            Direction.Left => Direction.Up,
-            _ => throw new Exception($"Unknown direction \"{direction.ToString()}\""),
-        };
+            return false;
+        }
+
+        points = DeepCloneArray(points);
+
+        points[pivotI, pivotJ] = Point.Occupied;
+
+        var visited = new HashSet<(int i, int j, Direction direction)>();
+
+        direction = Direction.Up;
+        var i = startI;
+        var j = startJ;
+
         while (points.GetLength(0) > i && points.GetLength(1) > j && i >= 0 && j >= 0)
         {
             if (visited.Contains((i, j, direction)))

@@ -15,7 +15,7 @@ public class Solution202406Tests
     }
 
     [TestCase("example1.txt", 6)]
-    [TestCase("real.txt", 2124)]
+    [TestCase("real.txt", 1928)]
     public async Task Solution2Tests(string fileName, int expected)
     {
         // 2124 is too high
