@@ -65,6 +65,51 @@ public static class Solution202408
 
     public static int Solution2(string[] fileContents)
     {
-        throw new NotImplementedException();
+        var charLookup = Parse(fileContents).CharLookup;
+        var pairs = new HashSet<(int x, int y)>();
+        foreach (var (c, list) in charLookup)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                var (curX, curY) = list[i];
+                for (int j = 0; j < list.Count; j++)
+                {
+                    if (i == j)
+                    {
+                        continue;
+                    }
+                    var (refX, refY) = list[j];
+                    var diffX = (curX - refX);
+                    var diffY = (curY - refY);
+                    var startX = curX;
+                    var startY = curY;
+                    while (
+                        startX >= 0
+                        && startY >= 0
+                        && startX < fileContents.Length
+                        && startY < fileContents[i].Length
+                    )
+                    {
+                        startX -= diffX;
+                        startY -= diffY;
+                    }
+                    startX += diffX;
+                    startY += diffY;
+
+                    while (
+                        startX >= 0
+                        && startY >= 0
+                        && startX < fileContents.Length
+                        && startY < fileContents[i].Length
+                    )
+                    {
+                        pairs.Add((startX, startY));
+                        startX += diffX;
+                        startY += diffY;
+                    }
+                }
+            }
+        }
+        return pairs.Count;
     }
 }
