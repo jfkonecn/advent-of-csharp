@@ -23,10 +23,10 @@ public static class Solution202410
 
     private static int TotalPaths(List<(int x, int y)> trailHeads, int[,] map)
     {
-        var nines = new HashSet<(int x, int y)>();
-
+        int total = 0;
         foreach (var (startX, startY) in trailHeads)
         {
+            var nines = new HashSet<(int x, int y)>();
             var stack = new Stack<(int x, int y)>();
             var visited = new HashSet<(int x, int y)>();
             stack.Push((startX, startY));
@@ -61,9 +61,10 @@ public static class Solution202410
                     }
                 }
             }
+            total += nines.Count;
         }
 
-        return nines.Count;
+        return total;
     }
 
     public static int Solution1(string[] fileContents)
