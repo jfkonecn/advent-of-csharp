@@ -33,7 +33,6 @@ public static class Solution202410
             while (stack.TryPop(out var result))
             {
                 var (curX, curY) = result;
-                //System.Console.WriteLine($"Visiting ({curX}, {curY})");
                 visited.Add((curX, curY));
                 var curNum = map[curX, curY];
                 if (curNum == 9)
@@ -75,6 +74,45 @@ public static class Solution202410
 
     public static int Solution2(string[] fileContents)
     {
-        throw new NotImplementedException();
+        var (trailHeads, map) = Parse(fileContents);
+        int total = 0;
+        foreach (var (startX, startY) in trailHeads)
+        {
+            var nines = new HashSet<(int x, int y)>();
+            var stack = new Stack<(int x, int y)>();
+            stack.Push((startX, startY));
+            while (stack.TryPop(out var result))
+            {
+                var (curX, curY) = result;
+                var curNum = map[curX, curY];
+                if (curNum == 9)
+                {
+                    total += 1;
+                }
+                else
+                {
+                    HandlePoint(curX - 1, curY, curNum);
+                    HandlePoint(curX + 1, curY, curNum);
+                    HandlePoint(curX, curY - 1, curNum);
+                    HandlePoint(curX, curY + 1, curNum);
+                }
+            }
+
+            void HandlePoint(int x, int y, int curNum)
+            {
+                if (x >= 0 && x < map.GetLength(0) && y >= 0 && y < map.GetLength(1))
+                {
+                    var num = map[x, y];
+
+                    if (curNum + 1 == num)
+                    {
+                        stack.Push((x, y));
+                    }
+                }
+            }
+            total += nines.Count;
+        }
+
+        return total;
     }
 }
