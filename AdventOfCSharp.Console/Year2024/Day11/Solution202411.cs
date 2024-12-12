@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace AdventOfCSharp.Console.Year2024.Day11;
 
 public static class Solution202411
@@ -7,19 +9,19 @@ public static class Solution202411
         return fileContents.Single().Split(' ').Select(long.Parse).ToList();
     }
 
-    private static int Process(string[] fileContents, int maxBlinks)
+    private static long Process(string[] fileContents, int maxBlinks)
     {
         var stones = Parse(fileContents);
 
-        int total = 0;
-        var cache = new Dictionary<(int blinks, long value), int>();
+        long total = 0;
+        var cache = new Dictionary<(int blinks, BigInteger value), long>();
         foreach (var stone in stones)
         {
             total += ProcessRec(0, stone);
         }
         return total;
 
-        int ProcessRec(int blinks, long cur)
+        long ProcessRec(int blinks, BigInteger cur)
         {
             if (blinks == maxBlinks)
             {
@@ -29,7 +31,7 @@ public static class Solution202411
             {
                 return cached;
             }
-            int answer = 0;
+            long answer = 0;
             var numStr = cur.ToString();
             if (cur == 0)
             {
@@ -38,29 +40,37 @@ public static class Solution202411
             else if (numStr.Length % 2 == 0)
             {
                 var length = numStr.Length / 2;
-                var first = long.Parse(new string(numStr.Take(length).ToArray()));
-                var second = long.Parse(new string(numStr.Skip(length).ToArray()));
+                var first = BigInteger.Parse(new string(numStr.Take(length).ToArray()));
+                var second = BigInteger.Parse(new string(numStr.Skip(length).ToArray()));
 
                 answer += ProcessRec(blinks + 1, first);
+                if (answer < 1)
+                {
+                    throw new Exception("less than one");
+                }
                 answer += ProcessRec(blinks + 1, second);
             }
             else
             {
-                answer += ProcessRec(blinks + 1, cur * 2024);
+                answer += ProcessRec(blinks + 1, cur * (BigInteger)2024);
             }
 
+            if (answer < 1)
+            {
+                throw new Exception("less than one");
+            }
             cache.Add((blinks, cur), answer);
 
             return answer;
         }
     }
 
-    public static int Solution1(string[] fileContents, int blinks)
+    public static long Solution1(string[] fileContents, int blinks)
     {
         return Process(fileContents, blinks);
     }
 
-    public static int Solution2(string[] fileContents, int blinks)
+    public static long Solution2(string[] fileContents, int blinks)
     {
         return Process(fileContents, blinks);
     }
