@@ -7,7 +7,7 @@ public static class Solution202412
         public required char Type { get; init; }
         public long Area { get; set; } = 0;
         public long Perimeter { get; set; } = 0;
-        public long Sides { get; set; } = 0;
+        public List<(int x, int y)> Boundary { get; set; } = new();
     }
 
     private static List<Plot> Parse(string[] fileContents)
@@ -24,6 +24,7 @@ public static class Solution202412
                 }
                 var plot = new Plot() { Type = fileContents[x][y] };
                 GetPlotInfo(x, y, plot);
+                plot.Boundary = plot.Boundary.OrderBy(x => x.x).ThenByDescending(x => x.y).ToList();
                 result.Add(plot);
             }
         }
@@ -44,17 +45,14 @@ public static class Solution202412
             }
 
             visited.Add((x, y));
-
             plot.Area++;
-            bool leftBorder = x == 0 || (x > 0 && fileContents[x - 1][y] != c);
-            bool topBorder = y == 0 || (y > 0 && fileContents[x][y - 1] != c);
-            bool rightBorder =
-                x == fileContents.Length - 1
-                || (x < fileContents.Length - 1 && fileContents[x + 1][y] != c);
-            bool bottomBorder =
-                y == fileContents[x].Length - 1
-                || (y < fileContents[x].Length - 1 && fileContents[x][y + 1] != c);
 
+            bool leftBorder = x == 0 || fileContents[x - 1][y] != c;
+            bool topBorder = y == 0 || fileContents[x][y - 1] != c;
+            bool rightBorder = x == fileContents.Length - 1 || fileContents[x + 1][y] != c;
+            bool bottomBorder = y == fileContents[x].Length - 1 || fileContents[x][y + 1] != c;
+
+            var startingPerimeter = plot.Perimeter;
             if (leftBorder)
             {
                 plot.Perimeter++;
@@ -72,38 +70,11 @@ public static class Solution202412
                 plot.Perimeter++;
             }
 
-            if (leftBorder && topBorder)
+            if (startingPerimeter != plot.Perimeter)
             {
-                plot.Sides++;
+                plot.Boundary.Add((x, y));
             }
-            if (rightBorder && topBorder)
-            {
-                plot.Sides++;
-            }
-            if (leftBorder && bottomBorder)
-            {
-                plot.Sides++;
-            }
-            if (rightBorder && bottomBorder)
-            {
-                plot.Sides++;
-            }
-            if (!rightBorder && leftBorder && bottomBorder && topBorder)
-            {
-                plot.Sides++;
-            }
-            else if (rightBorder && !leftBorder && bottomBorder && topBorder)
-            {
-                plot.Sides++;
-            }
-            else if (rightBorder && leftBorder && !bottomBorder && topBorder)
-            {
-                plot.Sides++;
-            }
-            else if (rightBorder && leftBorder && bottomBorder && !topBorder)
-            {
-                plot.Sides++;
-            }
+
             GetPlotInfo(x + 1, y, plot);
             GetPlotInfo(x - 1, y, plot);
             GetPlotInfo(x, y + 1, plot);
@@ -124,6 +95,11 @@ public static class Solution202412
         {
             System.Console.WriteLine(plot);
         }
-        return plots.Select(x => x.Area * x.Sides).Sum();
+        return plots
+            .Select(x =>
+            {
+                return x.Area * x.Area;
+            })
+            .Sum();
     }
 }
