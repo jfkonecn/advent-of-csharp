@@ -66,53 +66,34 @@ public static class Solution202413
 
         foreach (var machine in machines)
         {
-            var cache = new Dictionary<(long x, long y, int aPresses, int bPresses), long?>();
+            var prize = machine.Prize;
+            var aButton = machine.AButton;
+            var bButton = machine.BButton;
+            var bTimeNumerator = (prize.Y * aButton.X - prize.X * aButton.Y);
+            var bTimeDenominator = (bButton.Y * aButton.X - bButton.X * aButton.Y);
+            var bTimesRemainder = bTimeNumerator % bTimeDenominator;
 
-            var cost = GetCost(0, 0, 0, 0);
-            totalCost += cost ?? 0;
-
-            long? GetCost(long x, long y, int aPresses, int bPresses)
+            if (bTimesRemainder == 0)
             {
-                if (cache.TryGetValue((x, y, aPresses, bPresses), out var cacheValue))
+                var bTimes = bTimeNumerator / bTimeDenominator;
+                var aTimeNumerator = (prize.X - bButton.X * bTimes);
+                var aTimeDenominator = aButton.X;
+                var aTimesRemainder = aTimeNumerator % aTimeDenominator;
+                if (aTimesRemainder == 0)
                 {
-                    return cacheValue;
+                    var aTimes = aTimeNumerator / aTimeDenominator;
+                    totalCost += bTimes + aTimes * 3;
                 }
-                else if (machine.Prize.X == x && machine.Prize.Y == y)
-                {
-                    return 0;
-                }
-                long xAPush = x + machine.AButton.X;
-                long yAPush = y + machine.AButton.Y;
-                long xBPush = x + machine.BButton.X;
-                long yBPush = y + machine.BButton.Y;
-
-                long? aCost =
-                    xAPush > machine.Prize.X || yAPush > machine.Prize.Y
-                        ? null
-                        : 3 + GetCost(xAPush, yAPush, aPresses + 1, bPresses);
-                long? bCost =
-                    xBPush > machine.Prize.X || yBPush > machine.Prize.Y
-                        ? null
-                        : 1 + GetCost(xBPush, yBPush, aPresses, bPresses + 1);
-                long? answer = null;
-                if (aCost.HasValue && bCost.HasValue)
-                {
-                    answer = Math.Min(aCost.Value, bCost.Value);
-                }
-                else if (aCost.HasValue)
-                {
-                    answer = aCost;
-                }
-                else
-                {
-                    answer = bCost;
-                }
-                cache.Add((x, y, aPresses, bPresses), answer);
-                return answer;
             }
         }
 
         return totalCost;
+    }
+
+    // Manhattan distance heuristic
+    private static long ManhattanDistance(long x1, long y1, long x2, long y2)
+    {
+        return Math.Abs(x2 - x1) + Math.Abs(y2 - y1);
     }
 
     public static long Solution2(string[] fileContents)
