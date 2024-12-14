@@ -16,6 +16,10 @@ public class Solution202412Tests
     }
 
     [TestCase("example1.txt", 80)]
+    [TestCase("example2.txt", 1206)]
+    [TestCase("example3.txt", 236)]
+    [TestCase("example4.txt", 368)]
+    [TestCase("real.txt", 881182)]
     public async Task Solution2Tests(string fileName, int expected)
     {
         var fileContents = await Utils.GetAdventTestFile(2024, 12, fileName);

@@ -7,7 +7,7 @@ public static class Solution202412
         public required char Type { get; init; }
         public long Area { get; set; } = 0;
         public long Perimeter { get; set; } = 0;
-        public List<(int x, int y)> Boundary { get; set; } = new();
+        public HashSet<(int x, int y)> Points { get; set; } = new();
     }
 
     private static List<Plot> Parse(string[] fileContents)
@@ -24,7 +24,7 @@ public static class Solution202412
                 }
                 var plot = new Plot() { Type = fileContents[x][y] };
                 GetPlotInfo(x, y, plot);
-                plot.Boundary = plot.Boundary.OrderBy(x => x.x).ThenByDescending(x => x.y).ToList();
+                plot.Points = plot.Points.OrderBy(x => x.x).ThenByDescending(x => x.y).ToHashSet();
                 result.Add(plot);
             }
         }
@@ -70,10 +70,7 @@ public static class Solution202412
                 plot.Perimeter++;
             }
 
-            if (startingPerimeter != plot.Perimeter)
-            {
-                plot.Boundary.Add((x, y));
-            }
+            plot.Points.Add((x, y));
 
             GetPlotInfo(x + 1, y, plot);
             GetPlotInfo(x - 1, y, plot);
@@ -91,14 +88,57 @@ public static class Solution202412
     public static long Solution2(string[] fileContents)
     {
         var plots = Parse(fileContents);
-        foreach (var plot in plots)
-        {
-            System.Console.WriteLine(plot);
-        }
         return plots
-            .Select(x =>
+            .Select(plot =>
             {
-                return x.Area * x.Area;
+                var points = plot.Points;
+                int sides = 0;
+
+                var directions = new List<(int dx, int dy)> { (-1, 0), (1, 0), (0, -1), (0, 1) };
+
+                foreach (var (dx, dy) in directions.Where(x => x.dy == 0))
+                {
+                    for (int x = 0; x < fileContents.Length; x++)
+                    {
+                        bool onASide = false;
+                        for (int y = 0; y < fileContents[0].Length; y++)
+                        {
+                            int nx = x + dx;
+                            int ny = y + dy;
+                            if (!onASide && points.Contains((x, y)) && !points.Contains((nx, ny)))
+                            {
+                                sides++;
+                                onASide = true;
+                            }
+                            else if (!points.Contains((x, y)) || points.Contains((nx, ny)))
+                            {
+                                onASide = false;
+                            }
+                        }
+                    }
+                }
+                foreach (var (dx, dy) in directions.Where(x => x.dx == 0))
+                {
+                    for (int y = 0; y < fileContents[0].Length; y++)
+                    {
+                        bool onASide = false;
+                        for (int x = 0; x < fileContents.Length; x++)
+                        {
+                            int nx = x + dx;
+                            int ny = y + dy;
+                            if (!onASide && points.Contains((x, y)) && !points.Contains((nx, ny)))
+                            {
+                                sides++;
+                                onASide = true;
+                            }
+                            else if (!points.Contains((x, y)) || points.Contains((nx, ny)))
+                            {
+                                onASide = false;
+                            }
+                        }
+                    }
+                }
+                return sides * plot.Area;
             })
             .Sum();
     }
