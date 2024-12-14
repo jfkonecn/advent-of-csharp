@@ -47,10 +47,75 @@ public static class Solution202414
         return robots;
     }
 
-    public static int Solution1(string[] fileContents)
+    private enum Quadrant
+    {
+        Unknown,
+        UpperLeft,
+        UpperRight,
+        BottomLeft,
+        BottomRight,
+    }
+
+    public static int Solution1(string[] fileContents, int width, int height)
     {
         var robots = Parse(fileContents);
-        throw new NotImplementedException();
+        for (int i = 0; i < 100; i++)
+        {
+            foreach (var robot in robots)
+            {
+                robot.Position.X += robot.Velocity.X;
+                robot.Position.Y += robot.Velocity.Y;
+                if (robot.Position.X < 0)
+                {
+                    robot.Position.X += width;
+                }
+                else if (robot.Position.X >= width)
+                {
+                    robot.Position.X -= width;
+                }
+
+                if (robot.Position.Y < 0)
+                {
+                    robot.Position.Y += height;
+                }
+                else if (robot.Position.Y >= height)
+                {
+                    robot.Position.Y -= height;
+                }
+            }
+        }
+
+        var halfX = width / 2;
+        var halfY = height / 2;
+        return robots
+            .GroupBy(x => (x.Position.X, x.Position.Y))
+            .Select(x =>
+            {
+                if (x.Key.X < halfX && x.Key.Y < halfY)
+                {
+                    return (Quadrant.UpperLeft, x.Count());
+                }
+                else if (x.Key.X > halfX && x.Key.Y < halfY)
+                {
+                    return (Quadrant.UpperRight, x.Count());
+                }
+                else if (x.Key.X < halfX && x.Key.Y > halfY)
+                {
+                    return (Quadrant.BottomLeft, x.Count());
+                }
+                else if (x.Key.X > halfX && x.Key.Y > halfY)
+                {
+                    return (Quadrant.BottomRight, x.Count());
+                }
+                else
+                {
+                    return (Quadrant.Unknown, 0);
+                }
+            })
+            .GroupBy(x => x.Item1)
+            .Where(x => x.Key != Quadrant.Unknown)
+            .Select(x => x.Select(y => y.Item2).Sum())
+            .Aggregate(1, (pre, cur) => pre * cur);
     }
 
     public static int Solution2(string[] fileContents)
