@@ -4,8 +4,8 @@ public static class Solution202413
 {
     private record Point
     {
-        public required long X { get; init; }
-        public required long Y { get; init; }
+        public required long X { get; set; }
+        public required long Y { get; set; }
     }
 
     private record Machine
@@ -57,6 +57,11 @@ public static class Solution202413
     public static long Solution1(string[] fileContents)
     {
         var machines = Parse(fileContents);
+        return Calculate(machines);
+    }
+
+    private static long Calculate(Machine[] machines)
+    {
         long totalCost = 0;
 
         foreach (var machine in machines)
@@ -76,17 +81,19 @@ public static class Solution202413
                 {
                     return 0;
                 }
-                else if (aPresses > 100 || bPresses > 100)
-                {
-                    return null;
-                }
+                long xAPush = x + machine.AButton.X;
+                long yAPush = y + machine.AButton.Y;
+                long xBPush = x + machine.BButton.X;
+                long yBPush = y + machine.BButton.Y;
 
-                var aCost =
-                    3
-                    + GetCost(x + machine.AButton.X, y + machine.AButton.Y, aPresses + 1, bPresses);
-                var bCost =
-                    1
-                    + GetCost(x + machine.BButton.X, y + machine.BButton.Y, aPresses, bPresses + 1);
+                long? aCost =
+                    xAPush > machine.Prize.X || yAPush > machine.Prize.Y
+                        ? null
+                        : 3 + GetCost(xAPush, yAPush, aPresses + 1, bPresses);
+                long? bCost =
+                    xBPush > machine.Prize.X || yBPush > machine.Prize.Y
+                        ? null
+                        : 1 + GetCost(xBPush, yBPush, aPresses, bPresses + 1);
                 long? answer = null;
                 if (aCost.HasValue && bCost.HasValue)
                 {
@@ -108,8 +115,14 @@ public static class Solution202413
         return totalCost;
     }
 
-    public static int Solution2(string[] fileContents)
+    public static long Solution2(string[] fileContents)
     {
-        throw new NotImplementedException();
+        var machines = Parse(fileContents);
+        foreach (var machine in machines)
+        {
+            machine.Prize.X += 10000000000000;
+            machine.Prize.Y += 10000000000000;
+        }
+        return Calculate(machines);
     }
 }
