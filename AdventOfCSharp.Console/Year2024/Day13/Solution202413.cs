@@ -90,12 +90,6 @@ public static class Solution202413
         return totalCost;
     }
 
-    // Manhattan distance heuristic
-    private static long ManhattanDistance(long x1, long y1, long x2, long y2)
-    {
-        return Math.Abs(x2 - x1) + Math.Abs(y2 - y1);
-    }
-
     public static long Solution2(string[] fileContents)
     {
         var machines = Parse(fileContents);
