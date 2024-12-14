@@ -118,8 +118,61 @@ public static class Solution202414
             .Aggregate(1, (pre, cur) => pre * cur);
     }
 
-    public static int Solution2(string[] fileContents)
+    public static int Solution2(string[] fileContents, int width, int height, int? renders)
     {
-        throw new NotImplementedException();
+        var robots = Parse(fileContents);
+        var picture = new int[width, height];
+        foreach (var robot in robots)
+        {
+            picture[robot.Position.X, robot.Position.Y]++;
+        }
+        for (int i = 0; renders != null ? i < renders : true; i++)
+        {
+            foreach (var robot in robots)
+            {
+                picture[robot.Position.X, robot.Position.Y]--;
+                robot.Position.X += robot.Velocity.X;
+                robot.Position.Y += robot.Velocity.Y;
+                if (robot.Position.X < 0)
+                {
+                    robot.Position.X += width;
+                }
+                else if (robot.Position.X >= width)
+                {
+                    robot.Position.X -= width;
+                }
+
+                if (robot.Position.Y < 0)
+                {
+                    robot.Position.Y += height;
+                }
+                else if (robot.Position.Y >= height)
+                {
+                    robot.Position.Y -= height;
+                }
+                picture[robot.Position.X, robot.Position.Y]++;
+            }
+
+            System.Console.WriteLine("******");
+            for (int y = 0; y < picture.GetLength(1); y++)
+            {
+                for (int x = 0; x < picture.GetLength(0); x++)
+                {
+                    var num = picture[x, y];
+                    if (num == 0)
+                    {
+                        System.Console.Write('.');
+                    }
+                    else
+                    {
+                        System.Console.Write(picture[x, y]);
+                    }
+                }
+                System.Console.WriteLine();
+            }
+            System.Console.WriteLine("******");
+            System.Console.WriteLine($"Render {i + 1}");
+        }
+        return 0;
     }
 }
