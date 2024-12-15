@@ -321,15 +321,6 @@ public static class Solution202415
                 {
                     var (curX, curY) = popValue;
                     visited.Add((curX, curY));
-                    System.Console.WriteLine($"Visiting ({curX}, {curY})");
-                    if (
-                        warehouse[curY + dy, curX + dx] != Item.Empty
-                        && !visited.Contains((curX + dx, curY + dy))
-                    )
-                    {
-                        System.Console.WriteLine($"Adding Ahead ({curX + dx}, {curY + dy})");
-                        s.Push((curX + dx, curY + dy));
-                    }
                     var item = warehouse[curY, curX];
                     if (item == Item.Wall)
                     {
@@ -337,11 +328,18 @@ public static class Solution202415
                         canMove = false;
                         break;
                     }
-                    else if (item == Item.RightBox)
+                    if (
+                        warehouse[curY + dy, curX + dx] != Item.Empty
+                        && !visited.Contains((curX + dx, curY + dy))
+                    )
+                    {
+                        s.Push((curX + dx, curY + dy));
+                    }
+
+                    if (item == Item.RightBox)
                     {
                         if (!visited.Contains((curX - 1, curY)))
                         {
-                            System.Console.WriteLine($"Adding from RightBox ({curX - 1}, {curY})");
                             s.Push((curX - 1, curY));
                         }
                     }
@@ -349,7 +347,6 @@ public static class Solution202415
                     {
                         if (!visited.Contains((curX + 1, curY)))
                         {
-                            System.Console.WriteLine($"Adding from LeftBox ({curX + 1}, {curY})");
                             s.Push((curX + 1, curY));
                         }
                     }
