@@ -218,6 +218,7 @@ public static class Solution202415
 
         var oldWarehouse = result.Warehouse;
         var warehouse = new Item[oldWarehouse.GetLength(0), oldWarehouse.GetLength(1) * 2];
+        var previousWarehouse = new Item[oldWarehouse.GetLength(0), oldWarehouse.GetLength(1) * 2];
 
         var (robotX, robotY) = result.RobotStart;
         robotX *= 2;
@@ -244,7 +245,9 @@ public static class Solution202415
                 }
             }
         }
+        BackupWarehouse();
         Print(Move.Unknown);
+        var coordinatesToMove = new List<(int x, int y)>();
         foreach (var move in result.Moves)
         {
             var dy = move switch
@@ -260,8 +263,6 @@ public static class Solution202415
                 _ => 0,
             };
 
-            bool canMove = true;
-
             var tempY = robotY + dy;
             var tempX = robotX + dx;
             int boxesToPush = 0;
@@ -271,7 +272,7 @@ public static class Solution202415
                 var item = warehouse[tempY, tempX];
                 if (item == Item.Wall)
                 {
-                    canMove = false;
+                    coordinatesToMove.Clear();
                     break;
                 }
                 else if (item == Item.LeftBox || item == Item.RightBox)
@@ -282,12 +283,12 @@ public static class Solution202415
                     {
                         if (item == Item.RightBox && warehouse[tempY, tempX - 1] == Item.Wall)
                         {
-                            canMove = false;
+                            coordinatesToMove.Clear();
                             break;
                         }
                         else if (item == Item.LeftBox && warehouse[tempY, tempX + 1] == Item.Wall)
                         {
-                            canMove = false;
+                            coordinatesToMove.Clear();
                             break;
                         }
                     }
@@ -301,81 +302,26 @@ public static class Solution202415
                 }
             }
 
-            if (canMove)
+            int robotDx = dx switch
             {
-                robotY += dy;
-                var robotDx = dx;
-                if (dx != 0)
-                {
-                    robotDx = dx switch
-                    {
-                        -2 => -1,
-                        2 => 1,
-                        _ => throw new Exception($"Unexpected dx: {dx}"),
-                    };
-                }
-                robotX += robotDx;
+                2 => 1,
+                -2 => -1,
+                0 => 0,
+                _ => throw new Exception($"Unexpected dx {dx}"),
+            };
 
-                var preItem = warehouse[robotY, robotX];
+            robotX += robotDx;
+            robotY += dy;
+            foreach (var (oldX, oldY) in coordinatesToMove)
+            {
+                int newX = oldX + robotDx;
+                int newY = oldY + dy;
 
-                warehouse[robotY, robotX] = Item.Empty;
-
-                var y = robotY + dy;
-                var x = robotX + robotDx;
-
-                for (int i = 0; i < boxesToPush; i++)
-                {
-                    var curItem = warehouse[y, x];
-                    warehouse[y, x] = preItem;
-                    if (dx == 0 && dy != 0)
-                    {
-                        if (preItem == Item.RightBox)
-                        {
-                            warehouse[y + dy, x - 1] = Item.Empty;
-                            warehouse[y, x - 1] = Item.LeftBox;
-                        }
-                        else if (preItem == Item.LeftBox)
-                        {
-                            warehouse[y + dy, x + 1] = Item.Empty;
-                            warehouse[y, x + 1] = Item.RightBox;
-                        }
-                        else
-                        {
-                            throw new Exception(
-                                $"PreItem: {preItem} should be either a Left Box or Right Box"
-                            );
-                        }
-                        preItem = curItem;
-                    }
-                    else if (dx != 0 && dy == 0)
-                    {
-                        int newX = dx switch
-                        {
-                            -2 => x - 1,
-                            2 => x + 1,
-                            _ => throw new Exception($"Unexpected dx: {dx}"),
-                        };
-                        var temp = warehouse[y, newX];
-                        warehouse[y, newX] = preItem switch
-                        {
-                            Item.RightBox when dx == -2 => Item.LeftBox,
-                            Item.LeftBox when dx == 2 => Item.RightBox,
-                            _ => throw new Exception($"Unexpected preItem dx combo {dx} {preItem}"),
-                        };
-                        preItem = temp;
-                    }
-                    else
-                    {
-                        throw new Exception(
-                            $"dx {dx} or dy: {dy} only one should be zero and only one should be not zero"
-                        );
-                    }
-
-                    y += dy;
-                    x += dx;
-                }
+                warehouse[oldY, oldX] = Item.Empty;
+                warehouse[newY, newX] = previousWarehouse[oldY, oldX];
             }
             Print(move);
+            BackupWarehouse();
         }
 
         long sum = 0;
@@ -390,5 +336,16 @@ public static class Solution202415
             }
         }
         return sum;
+
+        void BackupWarehouse()
+        {
+            for (int y = 0; y < previousWarehouse.GetLength(0); y++)
+            {
+                for (int x = 0; x < previousWarehouse.GetLength(1); x++)
+                {
+                    previousWarehouse[y, x] = warehouse[y, x];
+                }
+            }
+        }
     }
 }
