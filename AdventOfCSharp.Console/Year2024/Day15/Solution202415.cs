@@ -108,8 +108,15 @@ public static class Solution202415
         bool solution2 = true
     )
     {
+        System.Console.Write(' ');
+        for (long x = 0; x < warehouse.GetLength(1); x++)
+        {
+            System.Console.Write((x % 10));
+        }
+        System.Console.WriteLine();
         for (long y = 0; y < warehouse.GetLength(0); y++)
         {
+            System.Console.Write(y % 10);
             for (long x = 0; x < warehouse.GetLength(1); x++)
             {
                 var c = warehouse[y, x] switch
@@ -224,8 +231,9 @@ public static class Solution202415
         robotX *= 2;
         void Print(Move move)
         {
-            System.Console.WriteLine($"Move {move}:");
-            PrintWarehouse(warehouse, robotX, robotY);
+            //System.Console.WriteLine($"Robot at ({robotX}, {robotY})");
+            //System.Console.WriteLine($"Move {move}:");
+            //PrintWarehouse(warehouse, robotX, robotY);
         }
         for (int y = 0; y < oldWarehouse.GetLength(0); y++)
         {
@@ -273,34 +281,97 @@ public static class Solution202415
             var tempY = robotY + dy;
             var tempX = robotX + robotDx;
 
-            while (warehouse[tempY, tempX] != Item.Empty)
+            bool canMove = true;
+
+            if (dx != 0 && dy == 0)
             {
-                var item = warehouse[tempY, tempX];
-                if (item == Item.Wall)
+                while (warehouse[tempY, tempX] != Item.Empty)
                 {
-                    coordinatesToMove.Clear();
-                    break;
-                }
-                else if (item == Item.LeftBox || item == Item.RightBox)
-                {
-                    if (dx != 0)
+                    var item = warehouse[tempY, tempX];
+                    if (item == Item.Wall)
+                    {
+                        coordinatesToMove.Clear();
+                        canMove = false;
+                        break;
+                    }
+                    else if (item == Item.LeftBox || item == Item.RightBox)
                     {
                         coordinatesToMove.Add((tempX, tempY));
                         coordinatesToMove.Add((tempX + robotDx, tempY));
+                        tempY += dy;
+                        tempX += dx;
                     }
-                    tempY += dy;
-                    tempX += dx;
-                }
-                else
-                {
-                    throw new Exception(
-                        $"Pushing {item} should be either a Left Box, Right Box, or Wall"
-                    );
+                    else
+                    {
+                        throw new Exception(
+                            $"Pushing {item} should be either a Left Box, Right Box, or Wall"
+                        );
+                    }
                 }
             }
+            else if (dx == 0 && dy != 0)
+            {
+                var visited = new HashSet<(int x, int y)>();
+                var s = new Stack<(int x, int y)>();
+                if (warehouse[tempY, tempX] != Item.Empty)
+                {
+                    s.Push((tempX, tempY));
+                }
+                while (s.TryPop(out var popValue))
+                {
+                    var (curX, curY) = popValue;
+                    visited.Add((curX, curY));
+                    System.Console.WriteLine($"Visiting ({curX}, {curY})");
+                    if (
+                        warehouse[curY + dy, curX + dx] != Item.Empty
+                        && !visited.Contains((curX + dx, curY + dy))
+                    )
+                    {
+                        System.Console.WriteLine($"Adding Ahead ({curX + dx}, {curY + dy})");
+                        s.Push((curX + dx, curY + dy));
+                    }
+                    var item = warehouse[curY, curX];
+                    if (item == Item.Wall)
+                    {
+                        coordinatesToMove.Clear();
+                        canMove = false;
+                        break;
+                    }
+                    else if (item == Item.RightBox)
+                    {
+                        if (!visited.Contains((curX - 1, curY)))
+                        {
+                            System.Console.WriteLine($"Adding from RightBox ({curX - 1}, {curY})");
+                            s.Push((curX - 1, curY));
+                        }
+                    }
+                    else if (item == Item.LeftBox)
+                    {
+                        if (!visited.Contains((curX + 1, curY)))
+                        {
+                            System.Console.WriteLine($"Adding from LeftBox ({curX + 1}, {curY})");
+                            s.Push((curX + 1, curY));
+                        }
+                    }
+                    else if (item != Item.Empty)
+                    {
+                        throw new Exception(
+                            $"Pushing {item} should be either a Left Box, Right Box, Empty, or Wall"
+                        );
+                    }
+                    coordinatesToMove.Add((curX, curY));
+                }
+            }
+            else
+            {
+                throw new Exception($"dx {dx} dy {dy} one must be zero and other not");
+            }
 
-            robotX += robotDx;
-            robotY += dy;
+            if (canMove)
+            {
+                robotX += robotDx;
+                robotY += dy;
+            }
             foreach (var (oldX, oldY) in coordinatesToMove)
             {
                 int newX = oldX + robotDx;
