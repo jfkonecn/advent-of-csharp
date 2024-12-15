@@ -263,9 +263,15 @@ public static class Solution202415
                 _ => 0,
             };
 
+            int robotDx = dx switch
+            {
+                2 => 1,
+                -2 => -1,
+                0 => 0,
+                _ => throw new Exception($"Unexpected dx {dx}"),
+            };
             var tempY = robotY + dy;
-            var tempX = robotX + dx;
-            int boxesToPush = 0;
+            var tempX = robotX + robotDx;
 
             while (warehouse[tempY, tempX] != Item.Empty)
             {
@@ -277,22 +283,13 @@ public static class Solution202415
                 }
                 else if (item == Item.LeftBox || item == Item.RightBox)
                 {
+                    if (dx != 0)
+                    {
+                        coordinatesToMove.Add((tempX, tempY));
+                        coordinatesToMove.Add((tempX + robotDx, tempY));
+                    }
                     tempY += dy;
                     tempX += dx;
-                    if (dy != 0)
-                    {
-                        if (item == Item.RightBox && warehouse[tempY, tempX - 1] == Item.Wall)
-                        {
-                            coordinatesToMove.Clear();
-                            break;
-                        }
-                        else if (item == Item.LeftBox && warehouse[tempY, tempX + 1] == Item.Wall)
-                        {
-                            coordinatesToMove.Clear();
-                            break;
-                        }
-                    }
-                    boxesToPush++;
                 }
                 else
                 {
@@ -302,14 +299,6 @@ public static class Solution202415
                 }
             }
 
-            int robotDx = dx switch
-            {
-                2 => 1,
-                -2 => -1,
-                0 => 0,
-                _ => throw new Exception($"Unexpected dx {dx}"),
-            };
-
             robotX += robotDx;
             robotY += dy;
             foreach (var (oldX, oldY) in coordinatesToMove)
@@ -318,8 +307,15 @@ public static class Solution202415
                 int newY = oldY + dy;
 
                 warehouse[oldY, oldX] = Item.Empty;
+            }
+            foreach (var (oldX, oldY) in coordinatesToMove)
+            {
+                int newX = oldX + robotDx;
+                int newY = oldY + dy;
+
                 warehouse[newY, newX] = previousWarehouse[oldY, oldX];
             }
+            coordinatesToMove.Clear();
             Print(move);
             BackupWarehouse();
         }
