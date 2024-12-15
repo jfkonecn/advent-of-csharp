@@ -178,10 +178,6 @@ public static class Solution202415
 
             if (canMove)
             {
-                if (boxesToPush == 2)
-                {
-                    _ = 1;
-                }
                 robotY += dy;
                 robotX += dx;
 
@@ -256,8 +252,8 @@ public static class Solution202415
             };
             var dx = move switch
             {
-                Move.Left => -1,
-                Move.Right => 1,
+                Move.Left => -2,
+                Move.Right => 2,
                 _ => 0,
             };
 
@@ -275,26 +271,39 @@ public static class Solution202415
                     canMove = false;
                     break;
                 }
-                else if (item == Item.Box)
+                else if (item == Item.LeftBox || item == Item.RightBox)
                 {
                     tempY += dy;
                     tempX += dx;
+                    if (dy != 0)
+                    {
+                        if (item == Item.RightBox && warehouse[tempY, tempX - 1] == Item.Wall)
+                        {
+                            canMove = false;
+                            break;
+                        }
+                        else if (item == Item.LeftBox && warehouse[tempY, tempX + 1] == Item.Wall)
+                        {
+                            canMove = false;
+                            break;
+                        }
+                    }
                     boxesToPush++;
                 }
                 else
                 {
-                    throw new Exception($"{item} should be either a Box or Wall");
+                    throw new Exception(
+                        $"Pushing {item} should be either a Left Box, Right Box, or Wall"
+                    );
                 }
             }
 
             if (canMove)
             {
-                if (boxesToPush == 2)
-                {
-                    _ = 1;
-                }
                 robotY += dy;
                 robotX += dx;
+
+                var preItem = warehouse[robotY, robotX];
 
                 warehouse[robotY, robotX] = Item.Empty;
 
@@ -303,7 +312,51 @@ public static class Solution202415
 
                 for (int i = 0; i < boxesToPush; i++)
                 {
-                    warehouse[y, x] = Item.Box;
+                    var curItem = warehouse[y, x];
+                    warehouse[y, x] = preItem;
+                    if (dx == 0 && dy != 0)
+                    {
+                        if (preItem == Item.RightBox)
+                        {
+                            warehouse[y + dy, x - 1] = Item.Empty;
+                            warehouse[y, x - 1] = Item.LeftBox;
+                        }
+                        else if (preItem == Item.LeftBox)
+                        {
+                            warehouse[y + dy, x + 1] = Item.Empty;
+                            warehouse[y, x + 1] = Item.RightBox;
+                        }
+                        else
+                        {
+                            throw new Exception(
+                                $"PreItem: {preItem} should be either a Left Box or Right Box"
+                            );
+                        }
+                    }
+                    else if (dx != 0 && dy == 0)
+                    {
+                        int newY = dx switch
+                        {
+                            -2 => y - 1,
+                            2 => y + 1,
+                            _ => throw new Exception($"Unexpected dx: {dx}"),
+                        };
+
+                        warehouse[y, x + newY] = preItem switch
+                        {
+                            Item.RightBox when dx == -1 => Item.LeftBox,
+                            Item.LeftBox when dx == -2 => Item.RightBox,
+                            _ => throw new Exception($"Unexpected preItem dx combo {dx} {preItem}"),
+                        };
+                    }
+                    else
+                    {
+                        throw new Exception(
+                            $"dx {dx} or dy: {dy} only one should be zero and only one should be not zero"
+                        );
+                    }
+
+                    preItem = curItem;
                     y += dy;
                     x += dx;
                 }
@@ -316,7 +369,7 @@ public static class Solution202415
         {
             for (long x = 0; x < warehouse.GetLength(1); x++)
             {
-                if (warehouse[y, x] == Item.Box)
+                if (warehouse[y, x] == Item.LeftBox)
                 {
                     sum += (100 * y) + x;
                 }
