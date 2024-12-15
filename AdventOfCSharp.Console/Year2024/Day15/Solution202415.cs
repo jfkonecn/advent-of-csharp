@@ -114,6 +114,9 @@ public static class Solution202415
             {
                 var c = warehouse[y, x] switch
                 {
+                    Item.LeftBox
+                    or Item.RightBox
+                    or Item.RightBox when y == RobotY && x == RobotX => 'X',
                     Item.Box => 'O',
                     Item.Wall => '#',
                     Item.Empty when y == RobotY && x == RobotX => '@',
@@ -302,6 +305,15 @@ public static class Solution202415
             {
                 robotY += dy;
                 robotX += dx;
+                if (dx != 0)
+                {
+                    robotX = dx switch
+                    {
+                        -2 => robotX + 1,
+                        2 => robotX - 1,
+                        _ => throw new Exception($"Unexpected dx: {dx}"),
+                    };
+                }
 
                 var preItem = warehouse[robotY, robotX];
 
@@ -335,17 +347,17 @@ public static class Solution202415
                     }
                     else if (dx != 0 && dy == 0)
                     {
-                        int newY = dx switch
+                        int newX = dx switch
                         {
-                            -2 => y - 1,
-                            2 => y + 1,
+                            -2 => x - 1,
+                            2 => x + 1,
                             _ => throw new Exception($"Unexpected dx: {dx}"),
                         };
 
-                        warehouse[y, x + newY] = preItem switch
+                        warehouse[y, x + newX] = preItem switch
                         {
-                            Item.RightBox when dx == -1 => Item.LeftBox,
-                            Item.LeftBox when dx == -2 => Item.RightBox,
+                            Item.RightBox when dx == -2 => Item.LeftBox,
+                            Item.LeftBox when dx == 2 => Item.RightBox,
                             _ => throw new Exception($"Unexpected preItem dx combo {dx} {preItem}"),
                         };
                     }
