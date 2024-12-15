@@ -101,44 +101,6 @@ public static class Solution202415
         };
     }
 
-    private static void PrintWarehouse(
-        Item[,] warehouse,
-        int RobotX,
-        int RobotY,
-        bool solution2 = true
-    )
-    {
-        System.Console.Write(' ');
-        for (long x = 0; x < warehouse.GetLength(1); x++)
-        {
-            System.Console.Write((x % 10));
-        }
-        System.Console.WriteLine();
-        for (long y = 0; y < warehouse.GetLength(0); y++)
-        {
-            System.Console.Write(y % 10);
-            for (long x = 0; x < warehouse.GetLength(1); x++)
-            {
-                var c = warehouse[y, x] switch
-                {
-                    Item.LeftBox
-                    or Item.RightBox
-                    or Item.RightBox when y == RobotY && x == RobotX => 'X',
-                    Item.Box => 'O',
-                    Item.Wall => '#',
-                    Item.Empty when y == RobotY && x == RobotX => '@',
-                    Item.LeftBox => '[',
-                    Item.RightBox => ']',
-                    Item.Empty => '.',
-                    _ => '?',
-                };
-                System.Console.Write(c);
-            }
-            System.Console.WriteLine();
-        }
-        System.Console.WriteLine();
-    }
-
     public static long Solution1(string[] fileContents)
     {
         var result = Parse(fileContents);
@@ -229,12 +191,6 @@ public static class Solution202415
 
         var (robotX, robotY) = result.RobotStart;
         robotX *= 2;
-        void Print(Move move)
-        {
-            //System.Console.WriteLine($"Robot at ({robotX}, {robotY})");
-            //System.Console.WriteLine($"Move {move}:");
-            //PrintWarehouse(warehouse, robotX, robotY);
-        }
         for (int y = 0; y < oldWarehouse.GetLength(0); y++)
         {
             for (int x = 0; x < oldWarehouse.GetLength(1); x++)
