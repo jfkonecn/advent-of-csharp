@@ -304,23 +304,24 @@ public static class Solution202415
             if (canMove)
             {
                 robotY += dy;
-                robotX += dx;
+                var robotDx = dx;
                 if (dx != 0)
                 {
-                    robotX = dx switch
+                    robotDx = dx switch
                     {
-                        -2 => robotX + 1,
-                        2 => robotX - 1,
+                        -2 => -1,
+                        2 => 1,
                         _ => throw new Exception($"Unexpected dx: {dx}"),
                     };
                 }
+                robotX += robotDx;
 
                 var preItem = warehouse[robotY, robotX];
 
                 warehouse[robotY, robotX] = Item.Empty;
 
                 var y = robotY + dy;
-                var x = robotX + dx;
+                var x = robotX + robotDx;
 
                 for (int i = 0; i < boxesToPush; i++)
                 {
@@ -344,6 +345,7 @@ public static class Solution202415
                                 $"PreItem: {preItem} should be either a Left Box or Right Box"
                             );
                         }
+                        preItem = curItem;
                     }
                     else if (dx != 0 && dy == 0)
                     {
@@ -353,13 +355,14 @@ public static class Solution202415
                             2 => x + 1,
                             _ => throw new Exception($"Unexpected dx: {dx}"),
                         };
-
-                        warehouse[y, x + newX] = preItem switch
+                        var temp = warehouse[y, newX];
+                        warehouse[y, newX] = preItem switch
                         {
                             Item.RightBox when dx == -2 => Item.LeftBox,
                             Item.LeftBox when dx == 2 => Item.RightBox,
                             _ => throw new Exception($"Unexpected preItem dx combo {dx} {preItem}"),
                         };
+                        preItem = temp;
                     }
                     else
                     {
@@ -368,7 +371,6 @@ public static class Solution202415
                         );
                     }
 
-                    preItem = curItem;
                     y += dy;
                     x += dx;
                 }
