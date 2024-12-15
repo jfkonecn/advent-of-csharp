@@ -221,6 +221,7 @@ public static class Solution202415
         var warehouse = new Item[oldWarehouse.GetLength(0), oldWarehouse.GetLength(1) * 2];
 
         var (robotX, robotY) = result.RobotStart;
+        robotX *= 2;
         void Print(Move move)
         {
             System.Console.WriteLine($"Move {move}:");
@@ -234,13 +235,13 @@ public static class Solution202415
                 int curX = x * 2;
                 if (item == Item.Box)
                 {
-                    oldWarehouse[y, x] = Item.LeftBox;
-                    oldWarehouse[y, x + 1] = Item.RightBox;
+                    warehouse[y, curX] = Item.LeftBox;
+                    warehouse[y, curX + 1] = Item.RightBox;
                 }
                 else
                 {
-                    oldWarehouse[y, x] = item;
-                    oldWarehouse[y, x + 1] = item;
+                    warehouse[y, curX] = item;
+                    warehouse[y, curX + 1] = item;
                 }
             }
         }
