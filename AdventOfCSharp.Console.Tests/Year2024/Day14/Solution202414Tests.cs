@@ -19,7 +19,7 @@ public class Solution202414Tests
     {
         // Answer was 7584
         var fileContents = await Utils.GetAdventTestFile(2024, 14, fileName);
-        var actual = Solution202414.Solution2(fileContents, width, height, 100);
+        var actual = Solution202414.Solution2(fileContents, width, height, 0);
         Assert.That(actual, Is.EqualTo(expected));
     }
 }

@@ -210,7 +210,6 @@ public static class Solution202415
             }
         }
         BackupWarehouse();
-        Print(Move.Unknown);
         var coordinatesToMove = new List<(int x, int y)>();
         foreach (var move in result.Moves)
         {
@@ -340,7 +339,6 @@ public static class Solution202415
                 warehouse[newY, newX] = previousWarehouse[oldY, oldX];
             }
             coordinatesToMove.Clear();
-            Print(move);
             BackupWarehouse();
         }
 
