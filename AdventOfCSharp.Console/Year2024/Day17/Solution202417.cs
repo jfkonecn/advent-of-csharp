@@ -98,8 +98,13 @@ public static class Solution202417
 
     public static string Solution1(string[] fileContents)
     {
-        var output = new List<string>();
         var cpu = Parse(fileContents);
+        return RunCpu(cpu);
+    }
+
+    private static string RunCpu(Cpu cpu)
+    {
+        var output = new List<string>();
         while (cpu.InstructionPointer < cpu.Instructions.Length)
         {
             var instruction = (Instruction)cpu.Instructions[cpu.InstructionPointer];
@@ -179,8 +184,37 @@ public static class Solution202417
         return string.Join(",", output);
     }
 
-    public static int Solution2(string[] fileContents)
+    public static long Solution2(string[] fileContents)
     {
-        throw new NotImplementedException();
+        var cpu = Parse(fileContents);
+        var expected = string.Join(",", cpu.Instructions);
+        long a =
+            Enumerable.Range(0, cpu.Instructions.Length - 1).Sum(i => 7 * (long)Math.Pow(8, i)) + 1;
+        while (true)
+        {
+            var result = RunCpu(cpu with { ARegister = a });
+
+            if (result.Length > expected.Length)
+            {
+                throw new InvalidOperationException("The output is too long");
+            }
+
+            if (result == expected)
+            {
+                return a;
+            }
+
+            long add = 0;
+            var split = result.Split(",").Select(short.Parse).ToArray();
+            for (int i = split.Length - 1; i >= 0; i--)
+            {
+                if (split[i] != cpu.Instructions[i])
+                {
+                    add = (long)Math.Pow(8, i);
+                    a += add;
+                    break;
+                }
+            }
+        }
     }
 }
