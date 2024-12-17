@@ -103,11 +103,27 @@ public static class Solution202417
         while (cpu.InstructionPointer < cpu.Instructions.Length)
         {
             var instruction = (Instruction)cpu.Instructions[cpu.InstructionPointer];
-            var operand = cpu.Instructions[cpu.InstructionPointer + 1];
+            var literalOperand = cpu.Instructions[cpu.InstructionPointer + 1];
+            //Combo operands 0 through 3 represent literal values 0 through 3.
+            //Combo operand 4 represents the value of register A.
+            //Combo operand 5 represents the value of register B.
+            //Combo operand 6 represents the value of register C.
+            //Combo operand 7 is reserved and will not appear in valid programs.
+            var comboOperand = literalOperand switch
+            {
+                0 or 1 or 2 or 3 => literalOperand,
+                4 => cpu.ARegister,
+                5 => cpu.BRegister,
+                6 => cpu.CRegister,
+                7 => throw new Exception("7 is not supported"),
+                _ => throw new Exception($"{literalOperand} is not a known operand"),
+            };
 
             if (instruction == Instruction.Adv)
             {
-                throw new NotImplementedException($"Op {instruction}");
+                var numerator = cpu.ARegister;
+                var denominator = (long)Math.Pow(2, comboOperand);
+                cpu.ARegister = numerator / denominator;
             }
             else if (instruction == Instruction.Bxl)
             {
