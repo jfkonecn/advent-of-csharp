@@ -96,10 +96,10 @@ public static class Solution202417
         }
     }
 
-    public static int Solution1(string[] fileContents)
+    public static string Solution1(string[] fileContents)
     {
+        var output = new List<string>();
         var cpu = Parse(fileContents);
-        PrintCpu(cpu);
         while (cpu.InstructionPointer < cpu.Instructions.Length)
         {
             var instruction = (Instruction)cpu.Instructions[cpu.InstructionPointer];
@@ -124,52 +124,59 @@ public static class Solution202417
                 var numerator = cpu.ARegister;
                 var denominator = (long)Math.Pow(2, comboOperand);
                 cpu.ARegister = numerator / denominator;
+                cpu.InstructionPointer += 2;
             }
             else if (instruction == Instruction.Bxl)
             {
-                throw new NotImplementedException($"Op {instruction}");
+                cpu.BRegister ^= literalOperand;
+                cpu.InstructionPointer += 2;
             }
             else if (instruction == Instruction.Bst)
             {
-                throw new NotImplementedException($"Op {instruction}");
+                cpu.BRegister = comboOperand % 8;
+                cpu.InstructionPointer += 2;
             }
             else if (instruction == Instruction.Jnz)
             {
-                throw new NotImplementedException($"Op {instruction}");
+                if (cpu.ARegister != 0)
+                {
+                    cpu.InstructionPointer = literalOperand;
+                }
+                else
+                {
+                    cpu.InstructionPointer += 2;
+                }
             }
             else if (instruction == Instruction.Bxc)
             {
-                throw new NotImplementedException($"Op {instruction}");
+                cpu.BRegister ^= cpu.CRegister;
+                cpu.InstructionPointer += 2;
             }
             else if (instruction == Instruction.Out)
             {
-                throw new NotImplementedException($"Op {instruction}");
+                output.Add((comboOperand % 8).ToString());
+                cpu.InstructionPointer += 2;
             }
             else if (instruction == Instruction.Bdv)
             {
-                throw new NotImplementedException($"Op {instruction}");
+                var numerator = cpu.ARegister;
+                var denominator = (long)Math.Pow(2, comboOperand);
+                cpu.BRegister = numerator / denominator;
+                cpu.InstructionPointer += 2;
             }
             else if (instruction == Instruction.Cdv)
             {
-                throw new NotImplementedException($"Op {instruction}");
+                var numerator = cpu.ARegister;
+                var denominator = (long)Math.Pow(2, comboOperand);
+                cpu.CRegister = numerator / denominator;
+                cpu.InstructionPointer += 2;
             }
             else
             {
                 throw new Exception($"Unknown Op {instruction}");
             }
         }
-        throw new NotImplementedException();
-
-        static void PrintCpu(Cpu cpu)
-        {
-            System.Console.WriteLine(cpu);
-            foreach (var instruction in cpu.Instructions)
-            {
-                System.Console.Write(instruction);
-                System.Console.Write(",");
-            }
-            System.Console.WriteLine();
-        }
+        return string.Join(",", output);
     }
 
     public static int Solution2(string[] fileContents)
