@@ -2,7 +2,7 @@ namespace AdventOfCSharp.Console.Year2024.Day17;
 
 public static class Solution202417
 {
-    private enum Operand
+    private enum Instruction
     {
         /*
          * The adv instruction (opcode 0) performs division. The numerator is
@@ -99,12 +99,61 @@ public static class Solution202417
     public static int Solution1(string[] fileContents)
     {
         var cpu = Parse(fileContents);
-        System.Console.WriteLine(cpu);
-        foreach (var instruction in cpu.Instructions)
+        PrintCpu(cpu);
+        while (cpu.InstructionPointer < cpu.Instructions.Length)
         {
-            System.Console.WriteLine(instruction);
+            var instruction = (Instruction)cpu.Instructions[cpu.InstructionPointer];
+            var operand = cpu.Instructions[cpu.InstructionPointer + 1];
+
+            if (instruction == Instruction.Adv)
+            {
+                throw new NotImplementedException($"Op {instruction}");
+            }
+            else if (instruction == Instruction.Bxl)
+            {
+                throw new NotImplementedException($"Op {instruction}");
+            }
+            else if (instruction == Instruction.Bst)
+            {
+                throw new NotImplementedException($"Op {instruction}");
+            }
+            else if (instruction == Instruction.Jnz)
+            {
+                throw new NotImplementedException($"Op {instruction}");
+            }
+            else if (instruction == Instruction.Bxc)
+            {
+                throw new NotImplementedException($"Op {instruction}");
+            }
+            else if (instruction == Instruction.Out)
+            {
+                throw new NotImplementedException($"Op {instruction}");
+            }
+            else if (instruction == Instruction.Bdv)
+            {
+                throw new NotImplementedException($"Op {instruction}");
+            }
+            else if (instruction == Instruction.Cdv)
+            {
+                throw new NotImplementedException($"Op {instruction}");
+            }
+            else
+            {
+                throw new Exception($"Unknown Op {instruction}");
+            }
         }
         throw new NotImplementedException();
+
+        static void PrintCpu(Cpu cpu)
+        {
+            System.Console.WriteLine(cpu);
+            foreach (var instruction in cpu.Instructions)
+            {
+                System.Console.Write(instruction);
+                System.Console.Write(",");
+            }
+            System.Console.WriteLine();
+        }
     }
 
     public static int Solution2(string[] fileContents)
