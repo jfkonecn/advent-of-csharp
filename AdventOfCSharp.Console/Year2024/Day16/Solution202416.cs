@@ -102,7 +102,7 @@ public static class Solution202416
         while (queue.Count > 0)
         {
             var (pos, history, currScore, currDir) = queue.Dequeue();
-            var (y, x) = pos;
+            var (x, y) = pos;
 
             if (pos.x == end.X && pos.y == end.Y)
             {
@@ -143,13 +143,13 @@ public static class Solution202416
                     && nx >= 0
                     && nx < maze.GetLength(1)
                     && maze[ny, nx] != Space.Wall
-                    && !history.Contains((ny, nx))
+                    && !history.Contains((nx, ny))
                 )
                 {
-                    var newHistory = new List<(int, int)>(history) { (ny, nx) };
+                    var newHistory = new List<(int, int)>(history) { (nx, ny) };
                     if (dir == currDir)
                     {
-                        queue.Enqueue(((ny, nx), newHistory, currScore + 1, dir)); // Move forward
+                        queue.Enqueue(((nx, ny), newHistory, currScore + 1, dir)); // Move forward
                     }
                     else
                     {
