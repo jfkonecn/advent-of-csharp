@@ -76,75 +76,97 @@ public static class Solution202416
         West,
     }
 
-    private static long FindCost(ParseResult result)
+    private static List<(List<(int x, int y)> History, int Score)> FindCost(ParseResult result)
     {
-        var directionArray = new (Direction, int dx, int dy)[]
+        var directions = new (Direction, int dx, int dy)[]
         {
             (Direction.North, 0, -1),
             (Direction.South, 0, 1),
             (Direction.East, 1, 0),
             (Direction.West, -1, 0),
         };
-        var dic = new Dictionary<(Direction, int x, int y), long?>();
 
-        var endX = result.End.X;
-        var endY = result.End.Y;
+        var routes = new List<(List<(int x, int y)> History, int Score)>();
+        var visited = new Dictionary<((int x, int y), Direction), int>();
+
         var maze = result.Maze;
+        var start = result.Start;
+        var end = result.End;
 
-        return FindCostRec(Direction.East, result.Start.X, result.Start.Y)
-            ?? throw new Exception("No Path Found");
+        var queue =
+            new Queue<((int x, int y) Pos, List<(int x, int y)> History, int Score, Direction)>();
+        queue.Enqueue(
+            ((start.X, start.Y), new List<(int, int)> { (start.X, start.Y) }, 0, Direction.East)
+        );
 
-        long? FindCostRec(Direction direction, int x, int y)
+        while (queue.Count > 0)
         {
-            System.Console.WriteLine($"Getting ({x}, {y})");
-            if (dic.TryGetValue((direction, x, y), out var dicValue))
-            {
-                return dicValue;
-            }
-            else if (x == endX && y == endY)
-            {
-                return 0;
-            }
-            var curSpace = maze[y, x];
+            var (pos, history, currScore, currDir) = queue.Dequeue();
+            var (y, x) = pos;
 
-            if (curSpace == Space.Wall)
+            if (pos.x == end.X && pos.y == end.Y)
             {
-                return null;
+                routes.Add((new List<(int x, int y)>(history), currScore));
+                continue;
             }
-            else if (curSpace == Space.Empty)
+
+            if (visited.ContainsKey((pos, currDir)) && visited[(pos, currDir)] < currScore)
+                continue;
+
+            visited[(pos, currDir)] = currScore;
+
+            foreach (var temp in directions)
             {
-                var answer = directionArray
-                    .Select(args =>
+                var (dir, dx, dy) = temp;
+
+                // Prevent reversing direction
+                var isOppositeDirection = (currDir, dir) switch
+                {
+
+                    (Direction.North, Direction.South)
+                    or
+                    (Direction.South, Direction.North)
+                    or
+                    (Direction.East, Direction.West)
+                    or (Direction.West, Direction.East) => true,
+                    _ => false,
+                };
+                if (isOppositeDirection)
+                    continue;
+
+                int ny = y + dy;
+                int nx = x + dx;
+
+                if (
+                    ny >= 0
+                    && ny < maze.GetLength(0)
+                    && nx >= 0
+                    && nx < maze.GetLength(1)
+                    && maze[ny, nx] != Space.Wall
+                    && !history.Contains((ny, nx))
+                )
+                {
+                    var newHistory = new List<(int, int)>(history) { (ny, nx) };
+                    if (dir == currDir)
                     {
-                        var (tempDir, dx, dy) = args;
-                        var pathValue = FindCostRec(tempDir, x + dx, y + dy);
-                        if (pathValue.HasValue)
-                        {
-                            pathValue += 1;
-                        }
-                        if (pathValue.HasValue && tempDir != direction)
-                        {
-                            pathValue += 1000;
-                        }
-                        return pathValue;
-                    })
-                    .Min();
-
-                dic.Add((direction, x, y), answer);
-
-                return answer;
-            }
-            else
-            {
-                throw new Exception($"Unexpected Space \"{curSpace}\"");
+                        queue.Enqueue(((ny, nx), newHistory, currScore + 1, dir)); // Move forward
+                    }
+                    else
+                    {
+                        queue.Enqueue((pos, history, currScore + 1000, dir)); // Turn
+                    }
+                }
             }
         }
+
+        return routes;
     }
 
     public static long Solution1(string[] fileContents)
     {
         var result = Parse(fileContents);
-        return FindCost(result);
+        var costs = FindCost(result);
+        return costs.Select(x => x.Score).Min();
     }
 
     private static void PrintResult(ParseResult result)

@@ -5,9 +5,12 @@ namespace AdventOfCSharp.Console.Tests.Year2024.Day16;
 [TestFixture]
 public class Solution202416Tests
 {
-    [TestCase("example1.txt", 0)]
+    [TestCase("example1.txt", 7036)]
+    [TestCase("example2.txt", 11048)]
+    [TestCase("real.txt", 104512)]
     public async Task Solution1Tests(string fileName, int expected)
     {
+        // 104512 too high
         var fileContents = await Utils.GetAdventTestFile(2024, 16, fileName);
         var actual = Solution202416.Solution1(fileContents);
         Assert.That(actual, Is.EqualTo(expected));
