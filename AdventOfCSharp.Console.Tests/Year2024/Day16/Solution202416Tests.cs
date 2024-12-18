@@ -15,7 +15,9 @@ public class Solution202416Tests
         Assert.That(actual, Is.EqualTo(expected));
     }
 
-    //[TestCase("example1.txt", 0)]
+    [TestCase("example1.txt", 45)]
+    [TestCase("example2.txt", 64)]
+    [TestCase("real.txt", 64)]
     public async Task Solution2Tests(string fileName, int expected)
     {
         var fileContents = await Utils.GetAdventTestFile(2024, 16, fileName);

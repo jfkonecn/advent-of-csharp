@@ -193,6 +193,13 @@ public static class Solution202416
 
     public static int Solution2(string[] fileContents)
     {
-        throw new NotImplementedException();
+        var result = Parse(fileContents);
+        var costs = FindCost(result);
+        var minCost = costs.Select(x => x.Score).Min();
+        var bestRoutes = costs
+            .Where(x => x.Score == minCost)
+            .SelectMany(x => x.History)
+            .GroupBy(x => x);
+        return bestRoutes.Count();
     }
 }
